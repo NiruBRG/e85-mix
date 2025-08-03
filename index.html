@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -100,27 +101,46 @@
       const currentFuel = (fuelPercent / 100) * tankMax;
       const targetVolume = (targetPercent / 100) * tankMax;
 
+      const resultDiv = document.getElementById('result');
+
       if (targetVolume <= currentFuel) {
-        document.getElementById('result').innerHTML = "❌ Target volume must be greater than current volume.";
-        document.getElementById('result').classList.add("visible");
+        resultDiv.innerHTML = "❌ Target volume must be greater than current volume.";
+        resultDiv.classList.add("visible");
         return;
       }
 
       const ethBase = currentFuel * currentEthanol;
+      const volumeToAdd = targetVolume - currentFuel;
 
+      // Special case: if target ethanol % is already achieved
+      if (Math.abs(currentEthanol - target) <= 0.1) {
+        // Solve: 0.85x + 0.10y = 0.55(x + y) where x + y = volumeToAdd
+        const y = (volumeToAdd * (e85Pct - target)) / (e85Pct - e10Pct);
+        const x = volumeToAdd - y;
+
+        if (x >= 0 && y >= 0) {
+          resultDiv.innerHTML = `
+            <strong>✅ Maintain E${target} with top-up:</strong><br/>
+            ➤ Add E85: ${x.toFixed(2)} gal<br/>
+            ➤ Add 93 Octane: ${(y * 3.785).toFixed(2)} L<br/>
+            ➤ Final Ethanol: ${target.toFixed(2)}%<br/>
+            ➤ Final Tank Volume: ${targetVolume.toFixed(2)} gal (${targetPercent}%)
+          `;
+          resultDiv.classList.add("visible");
+          return;
+        }
+      }
+
+      // Default blending logic
       let bestMatch = null;
-
-      for (let e85ToAdd = 0; e85ToAdd <= (targetVolume - currentFuel); e85ToAdd += 0.1) {
+      for (let e85ToAdd = 0; e85ToAdd <= volumeToAdd; e85ToAdd += 0.1) {
         const ethE85 = e85ToAdd * e85Pct;
-        const totalVolAfterE85 = currentFuel + e85ToAdd;
-        const ethTotal = ethBase + ethE85;
-
-        const vol93 = targetVolume - totalVolAfterE85;
+        const vol93 = volumeToAdd - e85ToAdd;
         const eth93 = vol93 * e10Pct;
+        const totalEth = ethBase + ethE85 + eth93;
+        const finalEth = totalEth / targetVolume;
 
-        const finalEth = (ethTotal + eth93) / targetVolume;
-
-        if (vol93 >= 0 && finalEth >= (target - 0.1) && finalEth <= (target + 0.1)) {
+        if (finalEth >= (target - 0.1) && finalEth <= (target + 0.1)) {
           bestMatch = {
             e85ToAdd: e85ToAdd.toFixed(2),
             vol93: vol93.toFixed(2),
@@ -128,10 +148,10 @@
             percentFull: ((targetVolume / tankMax) * 100).toFixed(1),
             ethanolResult: finalEth.toFixed(2)
           };
+          break;
         }
       }
 
-      const resultDiv = document.getElementById('result');
       if (bestMatch) {
         resultDiv.innerHTML = `
           <strong>✅ Optimized Blend:</strong><br/>
@@ -140,11 +160,11 @@
           ➤ Final Ethanol: ${bestMatch.ethanolResult}%<br/>
           ➤ Final Tank Volume: ${bestMatch.totalVol} gal (${bestMatch.percentFull}%)
         `;
-        resultDiv.classList.add("visible");
       } else {
         resultDiv.innerHTML = `❌ No valid blend found for this target.`;
-        resultDiv.classList.add("visible");
       }
+
+      resultDiv.classList.add("visible");
     }
   </script>
 </body>
