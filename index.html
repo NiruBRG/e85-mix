@@ -75,6 +75,9 @@
   <label>Current Ethanol % (from flex sensor):</label>
   <input type="number" id="currentEthanol" min="0" max="100" />
 
+  <label>Target Fuel Level (% of 15.6 gal):</label>
+  <input type="number" id="targetPercent" min="0" max="100" />
+
   <label>Target Ethanol %:</label>
   <input type="number" id="targetEthanol" min="10" max="85" />
 
@@ -91,28 +94,39 @@
 
       const fuelPercent = parseFloat(document.getElementById('fuelPercent').value || 0);
       const currentEthanol = parseFloat(document.getElementById('currentEthanol').value || 0);
+      const targetPercent = parseFloat(document.getElementById('targetPercent').value || 0);
       const target = parseFloat(document.getElementById('targetEthanol').value || 0);
 
       const currentFuel = (fuelPercent / 100) * tankMax;
+      const targetVolume = (targetPercent / 100) * tankMax;
+
+      if (targetVolume <= currentFuel) {
+        document.getElementById('result').innerHTML = "❌ Target volume must be greater than current volume.";
+        document.getElementById('result').classList.add("visible");
+        return;
+      }
+
       const ethBase = currentFuel * currentEthanol;
 
       let bestMatch = null;
 
-      for (let e85ToAdd = 0; e85ToAdd <= (tankMax - currentFuel); e85ToAdd += 0.1) {
+      for (let e85ToAdd = 0; e85ToAdd <= (targetVolume - currentFuel); e85ToAdd += 0.1) {
         const ethE85 = e85ToAdd * e85Pct;
         const totalVolAfterE85 = currentFuel + e85ToAdd;
         const ethTotal = ethBase + ethE85;
 
-        const vol93 = (ethTotal - target * totalVolAfterE85) / (target - e10Pct);
-        const totalVol = totalVolAfterE85 + vol93;
+        const vol93 = targetVolume - totalVolAfterE85;
+        const eth93 = vol93 * e10Pct;
 
-        if (vol93 >= 0 && totalVol <= tankMax) {
+        const finalEth = (ethTotal + eth93) / targetVolume;
+
+        if (vol93 >= 0 && finalEth >= (target - 0.1) && finalEth <= (target + 0.1)) {
           bestMatch = {
             e85ToAdd: e85ToAdd.toFixed(2),
             vol93: vol93.toFixed(2),
-            totalVol: totalVol.toFixed(2),
-            percentFull: ((totalVol / tankMax) * 100).toFixed(1),
-            ethanolResult: (ethTotal + (vol93 * e10Pct)) / totalVol
+            totalVol: targetVolume.toFixed(2),
+            percentFull: ((targetVolume / tankMax) * 100).toFixed(1),
+            ethanolResult: finalEth.toFixed(2)
           };
         }
       }
@@ -123,12 +137,12 @@
           <strong>✅ Optimized Blend:</strong><br/>
           ➤ Add E85: ${bestMatch.e85ToAdd} gal<br/>
           ➤ Add 93 Octane: ${(bestMatch.vol93 * 3.785).toFixed(2)} L<br/>
-          ➤ Final Ethanol: ${(bestMatch.ethanolResult).toFixed(2)}%<br/>
+          ➤ Final Ethanol: ${bestMatch.ethanolResult}%<br/>
           ➤ Final Tank Volume: ${bestMatch.totalVol} gal (${bestMatch.percentFull}%)
         `;
         resultDiv.classList.add("visible");
       } else {
-        resultDiv.innerHTML = `❌ No valid blend found.`;
+        resultDiv.innerHTML = `❌ No valid blend found for this target.`;
         resultDiv.classList.add("visible");
       }
     }
