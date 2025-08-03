@@ -1,7 +1,7 @@
 {
-  "name": "Target Ethanol Calculator",
-  "short_name": "E85 Tool",
-  "start_url": "index.html",
+  "name": "Target Blend Calculator",
+  "short_name": "E85 Target",
+  "start_url": "target-ethanol-calculator.html",
   "display": "standalone",
   "background_color": "#1e1e1e",
   "theme_color": "#1e1e1e",
