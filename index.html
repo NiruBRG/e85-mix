@@ -1,102 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>E55 Mix Optimizer</title>
-  <link rel="manifest" href="manifest.json">
-  
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>E55 Mix Optimizer</title>
+<link href="manifest.json" rel="manifest"/>
 <style>
-input[type=range] {
-  -webkit-appearance: none;
-  width: 100%;
-  height: 8px;
-  background: #ccc;
-  border-radius: 5px;
-  outline: none;
-  transition: background 0.3s;
-  position: relative;
-}
-input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: #fff;
-  border: 2px solid #4caf50;
-  cursor: pointer;
-  margin-top: -8px;
-}
-input[type=range]::-moz-range-thumb {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: #fff;
-  border: 2px solid #4caf50;
-  cursor: pointer;
-}
-.range-container {
-  position: relative;
-  margin-bottom: 24px;
-}
-.slider-value {
-  position: absolute;
-  top: -32px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 14px;
-  color: #fff;
-  background: #4caf50;
-  padding: 2px 8px;
-  border-radius: 12px;
-  white-space: nowrap;
-  display: none;
-}
-</style>
-
-<style>
-/* Prevent iOS input zoom */
-input, select, textarea {
-  font-size: 16px;
-}
-
-/* Fix slider green backfill */
-input[type=range] {
-  -webkit-appearance: none;
-  width: 100%;
-  height: 8px;
-  background: #ccc;
-  border-radius: 5px;
-  outline: none;
-  transition: background 0.3s;
-}
-input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: #fff;
-  border: 2px solid #4caf50;
-  cursor: pointer;
-  margin-top: -7px;
-}
-input[type=range]::-moz-range-thumb {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: #fff;
-  border: 2px solid #4caf50;
-  cursor: pointer;
-}
-/* For green fill as range is dragged */
-input[type=range]::-webkit-slider-runnable-track {
-  background: linear-gradient(to right, #4caf50 0%, #4caf50 var(--val, 50%), #ccc var(--val, 50%), #ccc 100%);
-  height: 8px;
-  border-radius: 5px;
-}
-</style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
       background-color: #111;
@@ -181,42 +91,46 @@ input[type=range]::-webkit-slider-runnable-track {
       font-size: 0.95rem;
     }
   </style>
-</head>
+<style>
+button, .output-container, .output-container p, input, select {
+    font-size: 16px !important;
+    touch-action: manipulation;
+}
+
+body {
+    -webkit-touch-callout: none;
+    -webkit-text-size-adjust: 100%;
+    touch-action: manipulation;
+}
+</style></head>
 <body>
-  <div class="container">
-    <h1>Target: E55 Mix Optimizer</h1>
-
-    <label>Current Fuel Level (% of 15.6 gal):</label>
-    <div class="slider-container">
-      <input type="range" id="fuelLevel" min="0" max="100" value="50" oninput="updateValue(this)" />
-      <div class="value-label" id="fuelLevelVal">50%</div>
-    </div>
-
-    <label>Current Ethanol % (from flex sensor):</label>
-    <div class="slider-container">
-      <input type="range" id="ethanolCurrent" min="0" max="100" value="50" oninput="updateValue(this)" />
-      <div class="value-label" id="ethanolCurrentVal">50%</div>
-    </div>
-
-    <label>Target Fuel Level (% of 15.6 gal):</label>
-    <div class="slider-container">
-      <input type="range" id="fuelTarget" min="0" max="100" value="90" oninput="updateValue(this)" />
-      <div class="value-label" id="fuelTargetVal">90%</div>
-    </div>
-
-    <label>Actual E85 % (measured at pump):</label>
-    <div class="slider-container">
-      <input type="range" id="ethanolE85" min="70" max="100" value="85" oninput="updateValue(this)" />
-      <div class="value-label" id="ethanolE85Val">85%</div>
-    </div>
-
-    <button class="calculate" onclick="calculate()">Calculate</button>
-    <button class="reset" onclick="resetForm()">Reset</button>
-
-    <div class="result" id="resultBox" style="display:none;"></div>
-  </div>
-
-  <script>
+<div class="container">
+<h1>Target: E55 Mix Optimizer</h1>
+<label>Current Fuel Level (% of 15.6 gal):</label>
+<div class="slider-container">
+<input id="fuelLevel" max="100" min="0" oninput="updateValue(this)" type="range" value="50"/>
+<div class="value-label" id="fuelLevelVal">50%</div>
+</div>
+<label>Current Ethanol % (from flex sensor):</label>
+<div class="slider-container">
+<input id="ethanolCurrent" max="100" min="0" oninput="updateValue(this)" type="range" value="50"/>
+<div class="value-label" id="ethanolCurrentVal">50%</div>
+</div>
+<label>Target Fuel Level (% of 15.6 gal):</label>
+<div class="slider-container">
+<input id="fuelTarget" max="100" min="0" oninput="updateValue(this)" type="range" value="90"/>
+<div class="value-label" id="fuelTargetVal">90%</div>
+</div>
+<label>Actual E85 % (measured at pump):</label>
+<div class="slider-container">
+<input id="ethanolE85" max="100" min="70" oninput="updateValue(this)" type="range" value="85"/>
+<div class="value-label" id="ethanolE85Val">85%</div>
+</div>
+<button class="calculate" onclick="calculate()">Calculate</button>
+<button class="reset" onclick="resetForm()">Reset</button>
+<div class="result" id="resultBox" style="display:none;"></div>
+</div>
+<script>
     function updateValue(input) {
       document.getElementById(input.id + 'Val').textContent = input.value + '%';
     }
@@ -271,33 +185,5 @@ input[type=range]::-webkit-slider-runnable-track {
       document.getElementById('resultBox').style.display = 'none';
     }
   </script>
-
-<script>
-document.querySelectorAll('.range-container input[type=range]').forEach(slider => {
-  const valueBubble = slider.parentElement.querySelector('.slider-value');
-
-  function updateSliderBackground(slider) {
-    const val = (slider.value - slider.min) / (slider.max - slider.min) * 100;
-    slider.style.background = `linear-gradient(to right, #4caf50 0%, #4caf50 ${val}%, #ccc ${val}%, #ccc 100%)`;
-  }
-
-  slider.addEventListener('input', () => {
-    valueBubble.style.display = 'block';
-    valueBubble.textContent = `${slider.value}%`;
-    updateSliderBackground(slider);
-  });
-
-  slider.addEventListener('change', () => {
-    valueBubble.style.display = 'block';
-    valueBubble.textContent = `${slider.value}%`;
-  });
-
-  slider.addEventListener('touchend', () => {
-    setTimeout(() => valueBubble.style.display = 'block', 100);
-  });
-
-  updateSliderBackground(slider);
-});
-</script>
 </body>
 </html>
