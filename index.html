@@ -4,7 +4,47 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Target Ethanol Mix Calculator</title>
-    <link rel="stylesheet" href="css/style.css"/>
+    <link rel="manifest" href="manifest.json"/>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Ethanol Mix Calc">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 600px;
+            margin: auto;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        form label {
+            display: block;
+            margin: 10px 0;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -19,6 +59,41 @@
         </form>
         <div id="result"></div>
     </div>
-    <script src="js/script.js"></script>
+    <script>
+        document.getElementById('ethanolForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const currentFuel = parseFloat(document.getElementById('currentFuel').value);
+            const currentEthanol = parseFloat(document.getElementById('currentEthanol').value) / 100;
+            const targetLevelPercent = parseFloat(document.getElementById('targetLevel').value);
+            const targetEthanol = parseFloat(document.getElementById('targetEthanol').value) / 100;
+            const actualE85 = parseFloat(document.getElementById('actualE85').value) / 100;
+
+            const tankCapacity = 15.6;
+            const targetVolume = tankCapacity * (targetLevelPercent / 100);
+
+            let resultText = "No valid blend found.";
+
+            for (let e85Gal = 0; e85Gal <= targetVolume - currentFuel; e85Gal += 0.01) {
+                let totalFuel = currentFuel + e85Gal;
+                let ethanolFromExisting = currentFuel * currentEthanol;
+                let ethanolFromE85 = e85Gal * actualE85;
+                let totalEthanol = ethanolFromExisting + ethanolFromE85;
+                let ethanolPercentage = totalEthanol / totalFuel;
+
+                if (ethanolPercentage >= targetEthanol - 0.005 && ethanolPercentage <= targetEthanol + 0.005) {
+                    let needed93 = targetVolume - currentFuel - e85Gal;
+                    if (needed93 >= 0) {
+                        resultText = `Add ${e85Gal.toFixed(2)} gallons (${(e85Gal * 3.785).toFixed(1)} L) of E85 and ` +
+                                     `${needed93.toFixed(2)} gallons (${(needed93 * 3.785).toFixed(1)} L) of 93 Octane.` +
+                                     `<br>Final Volume: ${targetVolume.toFixed(2)} gallons, ` +
+                                     `Final Ethanol %: ${(ethanolPercentage * 100).toFixed(1)}%`;
+                        break;
+                    }
+                }
+            }
+
+            document.getElementById('result').innerHTML = resultText;
+        });
+    </script>
 </body>
 </html>
