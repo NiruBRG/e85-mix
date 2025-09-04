@@ -2,10 +2,60 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>E55 Mix Optimizer</title>
   <link rel="manifest" href="manifest.json">
-  <style>
+  
+<style>
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 8px;
+  background: #ccc;
+  border-radius: 5px;
+  outline: none;
+  transition: background 0.3s;
+  position: relative;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #4caf50;
+  cursor: pointer;
+  margin-top: -8px;
+}
+input[type=range]::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #4caf50;
+  cursor: pointer;
+}
+.range-container {
+  position: relative;
+  margin-bottom: 24px;
+}
+.slider-value {
+  position: absolute;
+  top: -32px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 14px;
+  color: #fff;
+  background: #4caf50;
+  padding: 2px 8px;
+  border-radius: 12px;
+  white-space: nowrap;
+  display: none;
+}
+</style>
+
+<style>
 /* Prevent iOS input zoom */
 input, select, textarea {
   font-size: 16px;
@@ -221,5 +271,33 @@ input[type=range]::-webkit-slider-runnable-track {
       document.getElementById('resultBox').style.display = 'none';
     }
   </script>
+
+<script>
+document.querySelectorAll('.range-container input[type=range]').forEach(slider => {
+  const valueBubble = slider.parentElement.querySelector('.slider-value');
+
+  function updateSliderBackground(slider) {
+    const val = (slider.value - slider.min) / (slider.max - slider.min) * 100;
+    slider.style.background = `linear-gradient(to right, #4caf50 0%, #4caf50 ${val}%, #ccc ${val}%, #ccc 100%)`;
+  }
+
+  slider.addEventListener('input', () => {
+    valueBubble.style.display = 'block';
+    valueBubble.textContent = `${slider.value}%`;
+    updateSliderBackground(slider);
+  });
+
+  slider.addEventListener('change', () => {
+    valueBubble.style.display = 'block';
+    valueBubble.textContent = `${slider.value}%`;
+  });
+
+  slider.addEventListener('touchend', () => {
+    setTimeout(() => valueBubble.style.display = 'block', 100);
+  });
+
+  updateSliderBackground(slider);
+});
+</script>
 </body>
 </html>
