@@ -1,105 +1,93 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="manifest" href="manifest.json"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>E55 Mix Optimizer</title>
+  <link rel="manifest" href="manifest.json">
   <style>
     body {
-      background-color: #121212;
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #111;
       color: #fff;
       display: flex;
-      flex-direction: column;
+      justify-content: center;
       align-items: center;
-      padding: 20px;
+      height: 100vh;
+      margin: 0;
     }
     .container {
       background-color: #1e1e1e;
-      border-radius: 15px;
-      padding: 20px;
-      max-width: 400px;
-      width: 100%;
-      box-shadow: 0 0 15px rgba(0,0,0,0.3);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+      width: 90%;
+      max-width: 500px;
     }
     h1 {
-      font-size: 22px;
-      color: #55FF99;
+      color: #57f287;
       text-align: center;
+      font-size: 1.8rem;
       margin-bottom: 20px;
     }
     label {
       display: block;
-      margin-top: 15px;
-      margin-bottom: 5px;
+      margin: 20px 0 5px;
     }
     .slider-container {
       position: relative;
       width: 100%;
     }
-    .slider {
+    input[type="range"] {
       width: 100%;
       appearance: none;
       height: 8px;
       background: #333;
       border-radius: 5px;
       outline: none;
-      margin-bottom: 5px;
+      transition: background 0.3s;
     }
-    .slider::-webkit-slider-thumb {
+    input[type="range"]::-webkit-slider-thumb {
       appearance: none;
-      width: 24px;
       height: 24px;
+      width: 24px;
       border-radius: 50%;
-      background: #00FF99;
-      border: 3px solid white;
+      background: white;
+      border: 3px solid #57f287;
       cursor: pointer;
+      margin-top: -8px;
+      box-shadow: 0 0 2px rgba(0,0,0,0.5);
     }
-    .slider-fill {
-      position: absolute;
-      top: 50%;
-      height: 8px;
-      background: #00FF99;
-      border-radius: 5px;
-      transform: translateY(-50%);
-      z-index: 0;
-    }
-    .bubble {
-      position: absolute;
-      background: #333;
-      padding: 2px 8px;
-      border-radius: 12px;
-      color: white;
-      font-size: 12px;
-      transform: translate(-50%, -150%);
-      display: none;
+    .value-label {
+      font-size: 0.9rem;
+      color: #ccc;
+      margin-top: 5px;
+      text-align: right;
     }
     button {
       width: 100%;
-      margin-top: 15px;
-      padding: 10px;
-      border-radius: 8px;
+      padding: 12px;
+      font-size: 1rem;
       border: none;
-      color: white;
-      font-size: 16px;
-      background-color: #007bff;
+      border-radius: 8px;
+      margin-top: 15px;
       cursor: pointer;
     }
-    button:active {
-      background-color: #0056b3;
+    .calculate {
+      background-color: #007bff;
+      color: white;
     }
-    .output {
+    .reset {
+      background-color: #333;
+      color: white;
+    }
+    .result {
+      margin-top: 20px;
       background-color: #2c2c2c;
       padding: 15px;
       border-radius: 10px;
-      margin-top: 20px;
-      font-size: 14px;
-    }
-    .output .good {
-      color: #00FF99;
-      font-weight: bold;
+      color: #bfffc5;
+      font-size: 0.95rem;
     }
   </style>
 </head>
@@ -109,101 +97,87 @@
 
     <label>Current Fuel Level (% of 15.6 gal):</label>
     <div class="slider-container">
-      <div class="slider-fill" id="fill1"></div>
-      <input type="range" min="0" max="100" value="50" class="slider" id="slider1">
-      <div class="bubble" id="bubble1">50%</div>
+      <input type="range" id="fuelLevel" min="0" max="100" value="50" oninput="updateValue(this)" />
+      <div class="value-label" id="fuelLevelVal">50%</div>
     </div>
 
     <label>Current Ethanol % (from flex sensor):</label>
     <div class="slider-container">
-      <div class="slider-fill" id="fill2"></div>
-      <input type="range" min="0" max="100" value="50" class="slider" id="slider2">
-      <div class="bubble" id="bubble2">50%</div>
+      <input type="range" id="ethanolCurrent" min="0" max="100" value="50" oninput="updateValue(this)" />
+      <div class="value-label" id="ethanolCurrentVal">50%</div>
     </div>
 
     <label>Target Fuel Level (% of 15.6 gal):</label>
     <div class="slider-container">
-      <div class="slider-fill" id="fill3"></div>
-      <input type="range" min="0" max="100" value="100" class="slider" id="slider3">
-      <div class="bubble" id="bubble3">100%</div>
+      <input type="range" id="fuelTarget" min="0" max="100" value="90" oninput="updateValue(this)" />
+      <div class="value-label" id="fuelTargetVal">90%</div>
     </div>
 
     <label>Actual E85 % (measured at pump):</label>
     <div class="slider-container">
-      <div class="slider-fill" id="fill4"></div>
-      <input type="range" min="70" max="90" value="85" class="slider" id="slider4">
-      <div class="bubble" id="bubble4">85%</div>
+      <input type="range" id="ethanolE85" min="70" max="100" value="85" oninput="updateValue(this)" />
+      <div class="value-label" id="ethanolE85Val">85%</div>
     </div>
 
-    <button onclick="calculate()">Calculate</button>
-    <button onclick="location.reload()">Reset</button>
+    <button class="calculate" onclick="calculate()">Calculate</button>
+    <button class="reset" onclick="resetForm()">Reset</button>
 
-    <div class="output" id="outputBox"></div>
+    <div class="result" id="resultBox" style="display:none;"></div>
   </div>
 
   <script>
-    const sliders = [1, 2, 3, 4];
-    sliders.forEach(n => {
-      const slider = document.getElementById(`slider${n}`);
-      const fill = document.getElementById(`fill${n}`);
-      const bubble = document.getElementById(`bubble${n}`);
-      const updateSlider = () => {
-        const value = parseInt(slider.value);
-        const percent = value / (slider.max - slider.min) * 100;
-        fill.style.width = percent + "%";
-        bubble.innerText = value + "%";
-        bubble.style.left = percent + "%";
-      };
-      slider.addEventListener('input', () => {
-        updateSlider();
-        bubble.style.display = 'block';
-      });
-      slider.addEventListener('change', () => {
-        bubble.style.display = 'none';
-      });
-      updateSlider();
-    });
+    function updateValue(input) {
+      document.getElementById(input.id + 'Val').textContent = input.value + '%';
+    }
 
     function calculate() {
-      const currentFuel = parseFloat(slider1.value) / 100 * 15.6;
-      const currentEthanol = parseFloat(slider2.value);
-      const targetFuel = parseFloat(slider3.value) / 100 * 15.6;
-      const actualE85 = parseFloat(slider4.value);
+      const tankSize = 15.6;
+      const curLevel = parseFloat(document.getElementById('fuelLevel').value) / 100 * tankSize;
+      const curE = parseFloat(document.getElementById('ethanolCurrent').value);
+      const tgtLevel = parseFloat(document.getElementById('fuelTarget').value) / 100 * tankSize;
+      const e85 = parseFloat(document.getElementById('ethanolE85').value);
+      const tgtE = 55;
 
-      const currentEthanolAmount = (currentEthanol / 100) * currentFuel;
-      const targetEthanolAmount = 0.55 * targetFuel;
-
-      let found = false;
-      let best = null;
-
-      for (let e85 = 0; e85 <= (targetFuel - currentFuel); e85 += 0.01) {
-        let fuel93 = (targetFuel - currentFuel) - e85;
-        let finalEthanol = (currentEthanolAmount + e85 * (actualE85 / 100)) / targetFuel * 100;
-
-        if (Math.abs(finalEthanol - 55) <= 0.3) {
-          best = { e85, fuel93, finalEthanol };
-          found = true;
+      let bestMatch = null;
+      for (let e85Add = 0; e85Add <= (tgtLevel - curLevel); e85Add += 0.01) {
+        let totalVol = curLevel + e85Add;
+        let eContent = (curLevel * curE + e85Add * e85) / totalVol;
+        let needed93 = tgtLevel - totalVol;
+        let finalVol = totalVol + needed93;
+        eContent = (curLevel * curE + e85Add * e85 + needed93 * 10) / finalVol;
+        if (Math.abs(eContent - tgtE) < 0.2) {
+          bestMatch = { e85Add, needed93, finalVol, eContent };
           break;
         }
       }
 
-      const output = document.getElementById("outputBox");
-      if (found) {
-        output.innerHTML = `
-          <div class="good">✅ Optimized Blend (Target: E55)</div>
-          ➤ Add E85: ${ (best.e85 * 3.785).toFixed(1) } L (${best.e85.toFixed(2)} gal)<br>
-          ➤ Add 93 Octane: ${(best.fuel93 * 3.785).toFixed(1)} L (${best.fuel93.toFixed(2)} gal)<br>
-          ➤ Final Ethanol: ${best.finalEthanol.toFixed(2)}%<br>
-          ➤ Final Volume: ${targetFuel.toFixed(2)} gal (${((targetFuel / 15.6) * 100).toFixed(1)}% of tank)
+      let resultBox = document.getElementById('resultBox');
+      if (bestMatch) {
+        const e85L = (bestMatch.e85Add * 3.785).toFixed(1);
+        const r93L = (bestMatch.needed93 * 3.785).toFixed(1);
+        const volPct = ((bestMatch.finalVol / tankSize) * 100).toFixed(1);
+        resultBox.innerHTML = `
+          ✅ <strong>Optimized Blend (Target: E55)</strong><br>
+          ➤ Add E85: ${e85L} L (${bestMatch.e85Add.toFixed(2)} gal)<br>
+          ➤ Add 93 Octane: ${r93L} L (${bestMatch.needed93.toFixed(2)} gal)<br>
+          ➤ Final Ethanol: ${bestMatch.eContent.toFixed(2)}%<br>
+          ➤ Final Volume: ${bestMatch.finalVol.toFixed(2)} gal (${volPct}% of tank)
         `;
       } else {
-        let possible = ((currentEthanolAmount / targetFuel) * 100).toFixed(2);
-        output.innerHTML = `
-          <div class="good">⚠️ E55 Not Reachable</div>
-          ➤ Closest possible ethanol %: ${possible}%<br>
-          ➤ Final Volume: ${targetFuel.toFixed(2)} gal (${((targetFuel / 15.6) * 100).toFixed(1)}% of tank)
-        `;
+        resultBox.innerHTML = `⚠️ Could not reach E55. Try increasing your E85 volume or reducing target fill.`;
       }
+      resultBox.style.display = 'block';
+    }
+
+    function resetForm() {
+      ['fuelLevel','ethanolCurrent','fuelTarget','ethanolE85'].forEach(id => {
+        let input = document.getElementById(id);
+        input.value = id === 'fuelTarget' ? 90 : 50;
+        updateValue(input);
+      });
+      document.getElementById('ethanolE85').value = 85;
+      updateValue(document.getElementById('ethanolE85'));
+      document.getElementById('resultBox').style.display = 'none';
     }
   </script>
 </body>

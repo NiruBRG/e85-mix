@@ -1,16 +1,9 @@
-
 {
-  "name": "Target E55 Mix Optimizer",
+  "name": "E55 Mix Optimizer",
   "short_name": "E55 Optimizer",
-  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#121212",
-  "theme_color": "#00FF99",
-  "icons": [
-    {
-      "src": "icon.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    }
-  ]
+  "start_url": "index.html",
+  "background_color": "#111111",
+  "theme_color": "#57f287",
+  "icons": []
 }
