@@ -1,171 +1,24 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="icon.png">
-  <title>Target Ethanol Calculator</title>
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen;
-      background-color: #1e1e1e;
-      color: #f5f5f5;
-      padding: 2em;
-      max-width: 500px;
-      margin: auto;
-      -webkit-user-select: none;
-      -webkit-touch-callout: none;
-    }
-    h2 {
-      text-align: center;
-      color: #8fe388;
-    }
-    label {
-      font-weight: bold;
-      display: block;
-      margin-top: 0.7em;
-      margin-bottom: 0.2em;
-    }
-    input {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 0.8em;
-      background-color: #2a2a2a;
-      border: 1px solid #444;
-      color: #fff;
-      border-radius: 5px;
-      font-size: 16px;
-    }
-    button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 1em;
-      font-size: 1em;
-      background-color: #007acc;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #005fa3;
-    }
-    .result {
-      background: #2e2e2e;
-      padding: 15px;
-      margin-top: 20px;
-      border-radius: 8px;
-      font-size: 1em;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-    .result.visible {
-      opacity: 1;
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Target Ethanol Mix Calculator</title>
+    <link rel="stylesheet" href="css/style.css"/>
 </head>
 <body>
-  <h2>Target Ethanol Calculator</h2>
-
-  <label>Current Fuel Level (% of 15.6 gal):</label>
-  <input type="number" id="fuelPercent" min="0" max="100" />
-
-  <label>Current Ethanol % (from flex sensor):</label>
-  <input type="number" id="currentEthanol" min="0" max="100" />
-
-  <label>Target Fuel Level (% of 15.6 gal):</label>
-  <input type="number" id="targetPercent" min="0" max="100" />
-
-  <label>Target Ethanol %:</label>
-  <input type="number" id="targetEthanol" min="10" max="85" />
-
-  <button onclick="calculateTarget()">Calculate</button>
-  <button onclick="location.reload()">Reset</button>
-
-  <div id="result" class="result"></div>
-
-  <script>
-    function calculateTarget() {
-      const tankMax = 15.6;
-      const e85Pct = 85;
-      const e10Pct = 10;
-
-      const fuelPercent = parseFloat(document.getElementById('fuelPercent').value || 0);
-      const currentEthanol = parseFloat(document.getElementById('currentEthanol').value || 0);
-      const targetPercent = parseFloat(document.getElementById('targetPercent').value || 0);
-      const target = parseFloat(document.getElementById('targetEthanol').value || 0);
-
-      const currentFuel = (fuelPercent / 100) * tankMax;
-      const targetVolume = (targetPercent / 100) * tankMax;
-
-      const resultDiv = document.getElementById('result');
-
-      if (targetVolume <= currentFuel) {
-        resultDiv.innerHTML = "❌ Target volume must be greater than current volume.";
-        resultDiv.classList.add("visible");
-        return;
-      }
-
-      const ethBase = currentFuel * currentEthanol;
-      const volumeToAdd = targetVolume - currentFuel;
-
-      // Special case: if target ethanol % is already achieved
-      if (Math.abs(currentEthanol - target) <= 0.1) {
-        // Solve: 0.85x + 0.10y = 0.55(x + y) where x + y = volumeToAdd
-        const y = (volumeToAdd * (e85Pct - target)) / (e85Pct - e10Pct);
-        const x = volumeToAdd - y;
-
-        if (x >= 0 && y >= 0) {
-          resultDiv.innerHTML = `
-            <strong>✅ Maintain E${target} with top-up:</strong><br/>
-            ➤ Add E85: ${x.toFixed(2)} gal<br/>
-            ➤ Add 93 Octane: ${(y * 3.785).toFixed(2)} L<br/>
-            ➤ Final Ethanol: ${target.toFixed(2)}%<br/>
-            ➤ Final Tank Volume: ${targetVolume.toFixed(2)} gal (${targetPercent}%)
-          `;
-          resultDiv.classList.add("visible");
-          return;
-        }
-      }
-
-      // Default blending logic
-      let bestMatch = null;
-      for (let e85ToAdd = 0; e85ToAdd <= volumeToAdd; e85ToAdd += 0.1) {
-        const ethE85 = e85ToAdd * e85Pct;
-        const vol93 = volumeToAdd - e85ToAdd;
-        const eth93 = vol93 * e10Pct;
-        const totalEth = ethBase + ethE85 + eth93;
-        const finalEth = totalEth / targetVolume;
-
-        if (finalEth >= (target - 0.1) && finalEth <= (target + 0.1)) {
-          bestMatch = {
-            e85ToAdd: e85ToAdd.toFixed(2),
-            vol93: vol93.toFixed(2),
-            totalVol: targetVolume.toFixed(2),
-            percentFull: ((targetVolume / tankMax) * 100).toFixed(1),
-            ethanolResult: finalEth.toFixed(2)
-          };
-          break;
-        }
-      }
-
-      if (bestMatch) {
-        resultDiv.innerHTML = `
-          <strong>✅ Optimized Blend:</strong><br/>
-          ➤ Add E85: ${bestMatch.e85ToAdd} gal<br/>
-          ➤ Add 93 Octane: ${(bestMatch.vol93 * 3.785).toFixed(2)} L<br/>
-          ➤ Final Ethanol: ${bestMatch.ethanolResult}%<br/>
-          ➤ Final Tank Volume: ${bestMatch.totalVol} gal (${bestMatch.percentFull}%)
-        `;
-      } else {
-        resultDiv.innerHTML = `❌ No valid blend found for this target.`;
-      }
-
-      resultDiv.classList.add("visible");
-    }
-  </script>
+    <div class="container">
+        <h1>Target Ethanol Mix Calculator</h1>
+        <form id="ethanolForm">
+            <label>Current Fuel Level (gallons): <input type="number" step="0.01" id="currentFuel" required></label>
+            <label>Current Ethanol %: <input type="number" step="0.1" id="currentEthanol" required></label>
+            <label>Target Fuel Level (% of 15.6 gal): <input type="number" step="0.1" id="targetLevel" required></label>
+            <label>Target Ethanol %: <input type="number" step="0.1" id="targetEthanol" required></label>
+            <label>Actual E85 %: <input type="number" step="0.1" id="actualE85" required></label>
+            <button type="submit">Calculate</button>
+        </form>
+        <div id="result"></div>
+    </div>
+    <script src="js/script.js"></script>
 </body>
 </html>
