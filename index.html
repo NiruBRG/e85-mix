@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>E55 Mix Optimizer</title>
 <link href="manifest.json" rel="manifest"/>
 <style>
@@ -90,19 +90,16 @@
       color: #bfffc5;
       font-size: 0.95rem;
     }
-  </style>
-<style>
-button, .output-container, .output-container p, input, select {
-    font-size: 16px !important;
-    touch-action: manipulation;
+  
+.slider-value {
+  text-align: right;
+  font-size: 16px;
+  font-weight: bold;
+  color: #90ee90;
+  margin-top: 4px;
 }
-
-body {
-    -webkit-touch-callout: none;
-    -webkit-text-size-adjust: 100%;
-    touch-action: manipulation;
-}
-</style></head>
+</style>
+</head>
 <body>
 <div class="container">
 <h1>Target: E55 Mix Optimizer</h1>
@@ -110,22 +107,22 @@ body {
 <div class="slider-container">
 <input id="fuelLevel" max="100" min="0" oninput="updateValue(this)" type="range" value="50"/>
 <div class="value-label" id="fuelLevelVal">50%</div>
-</div>
+<div class="slider-value" id="valueDisplay0">0%</div></div>
 <label>Current Ethanol % (from flex sensor):</label>
 <div class="slider-container">
 <input id="ethanolCurrent" max="100" min="0" oninput="updateValue(this)" type="range" value="50"/>
 <div class="value-label" id="ethanolCurrentVal">50%</div>
-</div>
+<div class="slider-value" id="valueDisplay1">0%</div></div>
 <label>Target Fuel Level (% of 15.6 gal):</label>
 <div class="slider-container">
 <input id="fuelTarget" max="100" min="0" oninput="updateValue(this)" type="range" value="90"/>
 <div class="value-label" id="fuelTargetVal">90%</div>
-</div>
+<div class="slider-value" id="valueDisplay2">0%</div></div>
 <label>Actual E85 % (measured at pump):</label>
 <div class="slider-container">
 <input id="ethanolE85" max="100" min="70" oninput="updateValue(this)" type="range" value="85"/>
 <div class="value-label" id="ethanolE85Val">85%</div>
-</div>
+<div class="slider-value" id="valueDisplay3">0%</div></div>
 <button class="calculate" onclick="calculate()">Calculate</button>
 <button class="reset" onclick="resetForm()">Reset</button>
 <div class="result" id="resultBox" style="display:none;"></div>
@@ -184,6 +181,13 @@ body {
       updateValue(document.getElementById('ethanolE85'));
       document.getElementById('resultBox').style.display = 'none';
     }
-  </script>
+  
+document.querySelectorAll(".slider-container input[type=range]").forEach((slider, i) => {
+  const valueDisplay = document.getElementById(`valueDisplay${i}`);
+  const updateValue = () => valueDisplay.textContent = slider.value + "%";
+  slider.addEventListener("input", updateValue);
+  updateValue();
+});
+</script>
 </body>
 </html>
