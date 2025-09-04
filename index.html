@@ -48,7 +48,7 @@
       box-sizing: border-box;
       border-radius: 8px;
       padding: 10px 12px;
-      font-size: 16px;
+      font-size: 18px;
       border: 1px solid #444;
       background-color: #2a2a2a;
       color: #ffffff;
@@ -60,8 +60,8 @@
     }
     input {
       width: calc(100% - 2px); max-width: 100%; box-sizing: border-box;
-      padding: 12px;
-      font-size: 16px;
+      padding: 16px;
+      font-size: 18px;
       background: #2a2a2a;
       color: #ffffff;
       border: 1px solid #444;
@@ -72,8 +72,8 @@
       border-radius: 8px;
     }
       width: calc(100% - 2px); max-width: 100%; box-sizing: border-box;
-      padding: 12px;
-      font-size: 16px;
+      padding: 16px;
+      font-size: 18px;
       margin-top: 15px;
       border: none;
       border-radius: 6px;
@@ -81,6 +81,11 @@
       background-color: #007bff;
     }
     #result {
+  background: #2e2e2e;
+  border-radius: 10px;
+  padding: 16px;
+  font-size: 16px;
+  line-height: 1.5;
       margin-top: 20px;
       font-weight: bold;
       color: #72f28b;
@@ -113,7 +118,7 @@
 
       const currentFuel = tankCapacity * (currentFuelPercent / 100);
       const targetFuelVolume = tankCapacity * (targetFuelPercent / 100);
-      let resultText = "No valid blend found.";
+      let resultText = `<span style='color:#ff6b6b;'>⚠️ No valid blend found within tank limit.</span>`;
 
       for (let e85Gal = 0; e85Gal <= targetFuelVolume - currentFuel; e85Gal += 0.01) {
         let totalFuel = currentFuel + e85Gal;
@@ -127,11 +132,15 @@
         const wantsMoreVolume = targetFuelVolume > currentFuel;
         const meetsTarget = ethanolPercentage >= targetEthanol - 0.005 && ethanolPercentage <= targetEthanol + 0.005;
 
-        if ((isMatchingEthanol && wantsMoreVolume && totalFuel <= targetFuelVolume) || meetsTarget) {
+        if (meetsTarget && totalFuel <= targetFuelVolume) {
     
           let needed93 = targetFuelVolume - currentFuel - e85Gal;
           if (needed93 >= 0) {
-            resultText = `Add <b>${e85Gal.toFixed(2)} gal</b> (${(e85Gal * 3.785).toFixed(1)} L) of E85<br>` +
+            resultText = `<span style='color:#72f28b; font-weight: bold;'>✅ Optimized Blend:</span><br>
+    ➤ Add <b>${e85Gal.toFixed(2)} gal</b> (${(e85Gal * 3.785).toFixed(1)} L) of E85<br>
+    ➤ Add <b>${needed93.toFixed(2)} gal</b> (${(needed93 * 3.785).toFixed(1)} L) of 93 Octane<br>
+    ➤ Final Volume: ${targetFuelVolume.toFixed(2)} gal<br>
+    ➤ Final Ethanol %: ${(ethanolPercentage * 100).toFixed(2)}%` (${(e85Gal * 3.785).toFixed(1)} L) of E85<br>` +
                          `Add <b>${needed93.toFixed(2)} gal</b> (${(needed93 * 3.785).toFixed(1)} L) of 93<br>` +
                          `Final Volume: ${targetFuelVolume.toFixed(2)} gal<br>` +
                          `Final Ethanol %: ${(ethanolPercentage * 100).toFixed(1)}%`;
