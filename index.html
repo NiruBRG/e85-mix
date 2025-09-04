@@ -3,125 +3,144 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Target Ethanol Mix Calculator</title>
-  <link rel="manifest" href="manifest.json" />
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Ethanol Mix Calc">
-  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon.png">
+  <title>Target Ethanol Mix Calculator</title>
   <style>
-    :root { color-scheme: dark; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background: #121212;
-      color: #ffffff;
-      padding: 20px;
-    }
-    .container {
-      background: #1e1e1e;
-      padding: 24px;
-      border-radius: 12px;
-      max-width: 600px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen;
+      background-color: #1e1e1e;
+      color: #f5f5f5;
+      padding: 2em;
+      max-width: 500px;
       margin: auto;
-      box-shadow: 0 0 16px rgba(0, 0, 0, 0.5);
     }
-    h1 {
+    h2 {
       text-align: center;
-      color: #72f28b;
-      margin-bottom: 24px;
-      font-size: 24px;
+      color: #8fe388;
     }
-    form label {
+    label {
+      font-weight: bold;
       display: block;
-      font-size: 16px;
-      margin-bottom: 8px;
+      margin-top: 0.7em;
+      margin-bottom: 0.2em;
     }
     input {
       width: 100%;
-      box-sizing: border-box;
-      border-radius: 10px;
-      padding: 14px;
-      font-size: 18px;
-      background: #2a2a2a;
-      color: #ffffff;
+      padding: 10px;
+      margin-bottom: 0.8em;
+      background-color: #2a2a2a;
       border: 1px solid #444;
-      margin-bottom: 20px;
+      color: #fff;
+      border-radius: 5px;
+      font-size: 16px;
     }
     button {
       width: 100%;
-      padding: 16px;
-      font-size: 18px;
-      margin-top: 10px;
+      padding: 12px;
+      margin-top: 1em;
+      font-size: 1em;
+      background-color: #007acc;
+      color: white;
       border: none;
-      border-radius: 10px;
-      color: #fff;
-      background-color: #007bff;
+      border-radius: 5px;
       cursor: pointer;
     }
-    #result {
+    button:hover {
+      background-color: #005fa3;
+    }
+    .result {
       background: #2e2e2e;
-      border-radius: 10px;
-      padding: 16px;
-      font-size: 16px;
-      line-height: 1.6;
-      margin-top: 24px;
-      color: #ffffff;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 8px;
+      font-size: 1em;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .result.visible {
+      opacity: 1;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Target Ethanol Mix Calculator</h1>
-    <form id="ethanolForm">
-      <label>Current Fuel Level (% of 15.6 gal): <input type="number" step="0.1" id="currentFuel" required></label>
-      <label>Current Ethanol % (from flex sensor): <input type="number" step="0.1" id="currentEthanol" required></label>
-      <label>Target Fuel Level (% of 15.6 gal): <input type="number" step="0.1" id="targetLevel" required></label>
-      <label>Target Ethanol %: <input type="number" step="0.1" id="targetEthanol" required></label>
-      <label>Actual E85 %: <input type="number" step="0.1" id="actualE85" required></label>
-      <button type="submit">Calculate</button>
-      <button type="reset" style="background-color:#007bff;">Reset</button>
-    </form>
-    <div id="result"></div>
-  </div>
+  <h2>Target Ethanol Mix Calculator</h2>
+
+  <label>Current Fuel Level (% of 15.6 gal):</label>
+  <input type="number" id="currentFuel" min="0" max="100" />
+
+  <label>Current Ethanol % (from flex sensor):</label>
+  <input type="number" id="currentEthanol" min="0" max="100" />
+
+  <label>Target Fuel Level (% of 15.6 gal):</label>
+  <input type="number" id="targetLevel" min="0" max="100" />
+
+  <label>Target Ethanol %:</label>
+  <input type="number" id="targetEthanol" min="0" max="100" />
+
+  <label>Actual E85 %:</label>
+  <input type="number" id="actualE85" min="0" max="100" />
+
+  <button onclick="calculate()">Calculate</button>
+  <button onclick="location.reload()">Reset</button>
+
+  <div id="result" class="result"></div>
+
   <script>
-    document.getElementById('ethanolForm').addEventListener('submit', function(e) {
-      e.preventDefault();
+    function calculate() {
       const tankCapacity = 15.6;
-      const currentFuelPercent = parseFloat(document.getElementById('currentFuel').value);
-      const currentEthanol = parseFloat(document.getElementById('currentEthanol').value) / 100;
-      const targetFuelPercent = parseFloat(document.getElementById('targetLevel').value);
-      const targetEthanol = parseFloat(document.getElementById('targetEthanol').value) / 100;
-      const actualE85 = parseFloat(document.getElementById('actualE85').value) / 100;
+      const currentFuelPercent = parseFloat(document.getElementById('currentFuel').value || 0);
+      const currentEthanol = parseFloat(document.getElementById('currentEthanol').value || 0) / 100;
+      const targetFuelPercent = parseFloat(document.getElementById('targetLevel').value || 0);
+      const targetEthanol = parseFloat(document.getElementById('targetEthanol').value || 0) / 100;
+      const actualE85 = parseFloat(document.getElementById('actualE85').value || 0) / 100;
 
       const currentFuel = tankCapacity * (currentFuelPercent / 100);
       const targetFuelVolume = tankCapacity * (targetFuelPercent / 100);
 
-      let resultText = `<span style='color:#ff6b6b;'>⚠️ No valid blend found within tank limit.</span>`;
+      const maxAddable = targetFuelVolume - currentFuel;
+      let bestResult = null;
 
-      for (let e85Gal = 0; e85Gal <= targetFuelVolume - currentFuel; e85Gal += 0.01) {
-        let totalFuel = currentFuel + e85Gal;
-        let ethanolFromExisting = currentFuel * currentEthanol;
-        let ethanolFromE85 = e85Gal * actualE85;
-        let totalEthanol = ethanolFromExisting + ethanolFromE85;
-        let ethanolPercentage = totalEthanol / totalFuel;
+      for (let e85Add = maxAddable; e85Add >= 0; e85Add -= 0.01) {
+        const ethanolFromE85 = e85Add * actualE85;
+        const totalFuelAfterE85 = currentFuel + e85Add;
+        const ethanolFromCurrent = currentFuel * currentEthanol;
 
-        const meetsTarget = ethanolPercentage >= targetEthanol - 0.005 && ethanolPercentage <= targetEthanol + 0.005;
+        const remaining93 = targetFuelVolume - totalFuelAfterE85;
+        const ethanolFrom93 = remaining93 * 0.10;
 
-        if (meetsTarget && totalFuel <= targetFuelVolume) {
-          let needed93 = targetFuelVolume - currentFuel - e85Gal;
-          if (needed93 >= 0) {
-            resultText = `<span style='color:#72f28b; font-weight: bold;'>✅ Optimized Blend:</span><br>
-              ➤ Add <b>${e85Gal.toFixed(2)} gal</b> (${(e85Gal * 3.785).toFixed(1)} L) of E85<br>
-              ➤ Add <b>${needed93.toFixed(2)} gal</b> (${(needed93 * 3.785).toFixed(1)} L) of 93 Octane<br>
-              ➤ Final Volume: ${targetFuelVolume.toFixed(2)} gal<br>
-              ➤ Final Ethanol %: ${(ethanolPercentage * 100).toFixed(2)}%`;
-            break;
-          }
+        const totalEthanol = ethanolFromCurrent + ethanolFromE85 + ethanolFrom93;
+        const finalPct = totalEthanol / targetFuelVolume;
+
+        if (finalPct >= targetEthanol - 0.005 && finalPct <= targetEthanol + 0.005) {
+          bestResult = {
+            e85: e85Add.toFixed(2),
+            e93: remaining93.toFixed(2),
+            e93L: (remaining93 * 3.785).toFixed(2),
+            totalVol: targetFuelVolume.toFixed(2),
+            percentFull: targetFuelPercent.toFixed(1),
+            ethanol: (finalPct * 100).toFixed(2)
+          };
+          break;
         }
       }
 
-      document.getElementById('result').innerHTML = resultText;
-    });
+      const resultDiv = document.getElementById('result');
+      if (bestResult) {
+        resultDiv.innerHTML = `
+          <strong>✅ Optimized Blend:</strong><br/>
+          ➤ Add E85: ${bestResult.e85} gal<br/>
+          ➤ Add 93 Octane: ${bestResult.e93L} L (${bestResult.e93} gal)<br/>
+          ➤ Final Ethanol: ${bestResult.ethanol}%<br/>
+          ➤ Final Volume: ${bestResult.totalVol} gal (${bestResult.percentFull}% of tank)
+        `;
+      } else {
+        resultDiv.innerHTML = "❌ No valid blend found without overfilling.";
+      }
+
+      resultDiv.classList.add("visible");
+    }
   </script>
 </body>
 </html>
