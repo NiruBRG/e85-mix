@@ -1,1 +1,9 @@
-{"name": "E55 Mix Optimizer", "short_name": "E55 Mix", "display": "standalone"}
+{
+  "name": "E55 Mix Optimizer",
+  "short_name": "E55 Optimizer",
+  "display": "standalone",
+  "start_url": "index.html",
+  "background_color": "#111111",
+  "theme_color": "#57f287",
+  "icons": []
+}
