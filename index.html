@@ -2,182 +2,139 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>E55 Mix Optimizer</title>
-  <link rel="manifest" href="manifest.json">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="icon.png">
+  <title>E85 Optimizer (Flexible E55)</title>
   <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: #111;
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-    .container {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen;
       background-color: #1e1e1e;
-      padding: 30px;
-      border-radius: 20px;
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
-      width: 90%;
+      color: #f5f5f5;
+      padding: 2em;
       max-width: 500px;
+      margin: auto;
     }
-    h1 {
-      color: #57f287;
+    h2 {
       text-align: center;
-      font-size: 1.8rem;
-      margin-bottom: 20px;
+      color: #8fe388;
     }
     label {
+      font-weight: bold;
       display: block;
-      margin: 20px 0 5px;
+      margin-top: 0.7em;
+      margin-bottom: 0.2em;
     }
-    .slider-container {
-      position: relative;
+    input {
       width: 100%;
-    }
-    input[type="range"] {
-      width: 100%;
-      appearance: none;
-      height: 8px;
-      background: #333;
+      padding: 10px;
+      margin-bottom: 0.8em;
+      background-color: #2a2a2a;
+      border: 1px solid #444;
+      color: #fff;
       border-radius: 5px;
-      outline: none;
-      transition: background 0.3s;
-    }
-    input[type="range"]::-webkit-slider-thumb {
-      appearance: none;
-      height: 24px;
-      width: 24px;
-      border-radius: 50%;
-      background: white;
-      border: 3px solid #57f287;
-      cursor: pointer;
-      margin-top: -8px;
-      box-shadow: 0 0 2px rgba(0,0,0,0.5);
-    }
-    .value-label {
-      font-size: 0.9rem;
-      color: #ccc;
-      margin-top: 5px;
-      text-align: right;
+      font-size: 16px;
     }
     button {
       width: 100%;
       padding: 12px;
-      font-size: 1rem;
+      margin-top: 1em;
+      font-size: 1em;
+      background-color: #007acc;
+      color: white;
       border: none;
-      border-radius: 8px;
-      margin-top: 15px;
+      border-radius: 5px;
       cursor: pointer;
     }
-    .calculate {
-      background-color: #007bff;
-      color: white;
-    }
-    .reset {
-      background-color: #333;
-      color: white;
+    button:hover {
+      background-color: #005fa3;
     }
     .result {
-      margin-top: 20px;
-      background-color: #2c2c2c;
+      background: #2e2e2e;
       padding: 15px;
-      border-radius: 10px;
-      color: #bfffc5;
-      font-size: 0.95rem;
+      margin-top: 20px;
+      border-radius: 8px;
+      font-size: 1em;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .result.visible {
+      opacity: 1;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Target: E55 Mix Optimizer</h1>
+  <h2>E85 Optimizer (Target: E55)</h2>
 
-    <label>Current Fuel Level (% of 15.6 gal):</label>
-    <div class="slider-container">
-      <input type="range" id="fuelLevel" min="0" max="100" value="50" oninput="updateValue(this)" />
-      <div class="value-label" id="fuelLevelVal">50%</div>
-    </div>
+  <label>Current Fuel Level (% of 15.6 gal):</label>
+  <input type="number" id="fuelPercent" min="0" max="100" />
 
-    <label>Current Ethanol % (from flex sensor):</label>
-    <div class="slider-container">
-      <input type="range" id="ethanolCurrent" min="0" max="100" value="50" oninput="updateValue(this)" />
-      <div class="value-label" id="ethanolCurrentVal">50%</div>
-    </div>
+  <label>Current Ethanol % (from flex sensor):</label>
+  <input type="number" id="currentEthanol" min="0" max="100" />
 
-    <label>Target Fuel Level (% of 15.6 gal):</label>
-    <div class="slider-container">
-      <input type="range" id="fuelTarget" min="0" max="100" value="90" oninput="updateValue(this)" />
-      <div class="value-label" id="fuelTargetVal">90%</div>
-    </div>
+  <label>Gallons of E85 Brought (85% Ethanol):</label>
+  <input type="number" id="e85Available" min="0" max="15.6" />
 
-    <label>Actual E85 % (measured at pump):</label>
-    <div class="slider-container">
-      <input type="range" id="ethanolE85" min="70" max="100" value="85" oninput="updateValue(this)" />
-      <div class="value-label" id="ethanolE85Val">85%</div>
-    </div>
+  <button onclick="calculate()">Calculate</button>
+  <button onclick="location.reload()">Reset</button>
 
-    <button class="calculate" onclick="calculate()">Calculate</button>
-    <button class="reset" onclick="resetForm()">Reset</button>
-
-    <div class="result" id="resultBox" style="display:none;"></div>
-  </div>
+  <div id="result" class="result"></div>
 
   <script>
-    function updateValue(input) {
-      document.getElementById(input.id + 'Val').textContent = input.value + '%';
-    }
-
     function calculate() {
-      const tankSize = 15.6;
-      const curLevel = parseFloat(document.getElementById('fuelLevel').value) / 100 * tankSize;
-      const curE = parseFloat(document.getElementById('ethanolCurrent').value);
-      const tgtLevel = parseFloat(document.getElementById('fuelTarget').value) / 100 * tankSize;
-      const e85 = parseFloat(document.getElementById('ethanolE85').value);
-      const tgtE = 55;
+      const tankCapacity = 15.6;
+      const e85Pct = 85;
+      const e10Pct = 10;
+      const targetEthanol = 55;
 
-      let bestMatch = null;
-      for (let e85Add = 0; e85Add <= (tgtLevel - curLevel); e85Add += 0.01) {
-        let totalVol = curLevel + e85Add;
-        let eContent = (curLevel * curE + e85Add * e85) / totalVol;
-        let needed93 = tgtLevel - totalVol;
-        let finalVol = totalVol + needed93;
-        eContent = (curLevel * curE + e85Add * e85 + needed93 * 10) / finalVol;
-        if (Math.abs(eContent - tgtE) < 0.2) {
-          bestMatch = { e85Add, needed93, finalVol, eContent };
-          break;
+      const fuelPercent = parseFloat(document.getElementById('fuelPercent').value || 0);
+      const currentEthanol = parseFloat(document.getElementById('currentEthanol').value || 0);
+      const e85Available = parseFloat(document.getElementById('e85Available').value || 0);
+
+      const currentVol = (fuelPercent / 100) * tankCapacity;
+      const currentEth = currentVol * currentEthanol;
+
+      const maxAddable = tankCapacity - currentVol;
+      let bestResult = null;
+
+      for (let e85Add = Math.min(e85Available, maxAddable); e85Add >= 0; e85Add -= 0.01) {
+        for (let e93Add = maxAddable - e85Add; e93Add >= 0; e93Add -= 0.01) {
+          const totalVol = currentVol + e85Add + e93Add;
+          if (totalVol > tankCapacity) continue;
+
+          const totalEth = currentEth + (e85Add * e85Pct) + (e93Add * e10Pct);
+          const finalPct = totalEth / totalVol;
+
+          if (finalPct >= 54.9 && finalPct <= 55.1) {
+            bestResult = {
+              e85: e85Add.toFixed(2),
+              e93: e93Add.toFixed(2),
+              e93L: (e93Add * 3.785).toFixed(2),
+              totalVol: totalVol.toFixed(2),
+              percentFull: ((totalVol / tankCapacity) * 100).toFixed(1),
+              ethanol: finalPct.toFixed(2)
+            };
+            break;
+          }
         }
+        if (bestResult) break;
       }
 
-      let resultBox = document.getElementById('resultBox');
-      if (bestMatch) {
-        const e85L = (bestMatch.e85Add * 3.785).toFixed(1);
-        const r93L = (bestMatch.needed93 * 3.785).toFixed(1);
-        const volPct = ((bestMatch.finalVol / tankSize) * 100).toFixed(1);
-        resultBox.innerHTML = `
-          ✅ <strong>Optimized Blend (Target: E55)</strong><br>
-          ➤ Add E85: ${e85L} L (${bestMatch.e85Add.toFixed(2)} gal)<br>
-          ➤ Add 93 Octane: ${r93L} L (${bestMatch.needed93.toFixed(2)} gal)<br>
-          ➤ Final Ethanol: ${bestMatch.eContent.toFixed(2)}%<br>
-          ➤ Final Volume: ${bestMatch.finalVol.toFixed(2)} gal (${volPct}% of tank)
+      const resultDiv = document.getElementById('result');
+      if (bestResult) {
+        resultDiv.innerHTML = `
+          <strong>✅ Optimized Blend (E55):</strong><br/>
+          ➤ Add E85: ${bestResult.e85} gal<br/>
+          ➤ Add 93 Octane: ${bestResult.e93L} L (${bestResult.e93} gal)<br/>
+          ➤ Final Ethanol: ${bestResult.ethanol}%<br/>
+          ➤ Final Volume: ${bestResult.totalVol} gal (${bestResult.percentFull}% of tank)
         `;
       } else {
-        resultBox.innerHTML = `⚠️ Could not reach E55. Try increasing your E85 volume or reducing target fill.`;
+        resultDiv.innerHTML = "❌ No valid blend found for E55 without overfilling.";
       }
-      resultBox.style.display = 'block';
-    }
 
-    function resetForm() {
-      ['fuelLevel','ethanolCurrent','fuelTarget','ethanolE85'].forEach(id => {
-        let input = document.getElementById(id);
-        input.value = id === 'fuelTarget' ? 90 : 50;
-        updateValue(input);
-      });
-      document.getElementById('ethanolE85').value = 85;
-      updateValue(document.getElementById('ethanolE85'));
-      document.getElementById('resultBox').style.display = 'none';
+      resultDiv.classList.add("visible");
     }
   </script>
 </body>
