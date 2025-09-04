@@ -1,141 +1,156 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="icon.png">
-  <title>E85 Optimizer (Flexible E55)</title>
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen;
-      background-color: #1e1e1e;
-      color: #f5f5f5;
-      padding: 2em;
-      max-width: 500px;
-      margin: auto;
-    }
-    h2 {
-      text-align: center;
-      color: #8fe388;
-    }
-    label {
-      font-weight: bold;
-      display: block;
-      margin-top: 0.7em;
-      margin-bottom: 0.2em;
-    }
-    input {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 0.8em;
-      background-color: #2a2a2a;
-      border: 1px solid #444;
-      color: #fff;
-      border-radius: 5px;
-      font-size: 16px;
-    }
-    button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 1em;
-      font-size: 1em;
-      background-color: #007acc;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #005fa3;
-    }
-    .result {
-      background: #2e2e2e;
-      padding: 15px;
-      margin-top: 20px;
-      border-radius: 8px;
-      font-size: 1em;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-    .result.visible {
-      opacity: 1;
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>E55 Mix Calculator</title>
+    <link rel="manifest" href="manifest.json" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1e1e1e;
+            color: #f5f5f5;
+            padding: 20px;
+            margin: 0;
+        }
+        h1 {
+            text-align: center;
+            font-size: 1.6em;
+            margin-bottom: 20px;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background-color: #2c2c2c;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+        }
+        .slider-container {
+            margin-bottom: 20px;
+        }
+        input[type="range"] {
+            width: 100%;
+            appearance: none;
+            height: 8px;
+            border-radius: 5px;
+            background: linear-gradient(to right, #4caf50 var(--val, 0%), #555 var(--val, 0%));
+            outline: none;
+            transition: background 0.3s;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            box-shadow: 0 0 2px #000;
+        }
+        .value-label {
+            text-align: right;
+            font-size: 0.9em;
+            color: #ccc;
+            margin-top: -10px;
+            margin-bottom: 10px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #4caf50;
+            color: white;
+            font-size: 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .result {
+            background-color: #333;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 1em;
+        }
+    </style>
 </head>
 <body>
-  <h2>E85 Optimizer (Target: E55)</h2>
+    <h1>E55 Mix Calculator</h1>
+    <div class="container">
+        <div class="slider-container">
+            <label for="fuelLevel">Current Fuel Level (% of 15.6 gal)</label>
+            <input type="range" id="fuelLevel" min="0" max="100" value="50" oninput="updateSlider(this)" />
+            <div class="value-label" id="fuelLevelVal">50%</div>
+        </div>
+        <div class="slider-container">
+            <label for="ethanolPercent">Current Ethanol % (from flex fuel sensor)</label>
+            <input type="range" id="ethanolPercent" min="0" max="85" value="30" oninput="updateSlider(this)" />
+            <div class="value-label" id="ethanolPercentVal">30%</div>
+        </div>
+        <div class="slider-container">
+            <label for="targetFill">Target Fill Level (% of 15.6 gal)</label>
+            <input type="range" id="targetFill" min="0" max="100" value="80" oninput="updateSlider(this)" />
+            <div class="value-label" id="targetFillVal">80%</div>
+        </div>
+        <div class="slider-container">
+            <label for="e85Percent">E85 Ethanol %</label>
+            <input type="range" id="e85Percent" min="70" max="85" value="85" oninput="updateSlider(this)" />
+            <div class="value-label" id="e85PercentVal">85%</div>
+        </div>
+        <button onclick="calculate()">Calculate</button>
+        <div class="result" id="resultBox"></div>
+    </div>
 
-  <label>Current Fuel Level (% of 15.6 gal):</label>
-  <input type="number" id="fuelPercent" min="0" max="100" />
-
-  <label>Current Ethanol % (from flex sensor):</label>
-  <input type="number" id="currentEthanol" min="0" max="100" />
-
-  <label>Gallons of E85 Brought (85% Ethanol):</label>
-  <input type="number" id="e85Available" min="0" max="15.6" />
-
-  <button onclick="calculate()">Calculate</button>
-  <button onclick="location.reload()">Reset</button>
-
-  <div id="result" class="result"></div>
-
-  <script>
-    function calculate() {
-      const tankCapacity = 15.6;
-      const e85Pct = 85;
-      const e10Pct = 10;
-      const targetEthanol = 55;
-
-      const fuelPercent = parseFloat(document.getElementById('fuelPercent').value || 0);
-      const currentEthanol = parseFloat(document.getElementById('currentEthanol').value || 0);
-      const e85Available = parseFloat(document.getElementById('e85Available').value || 0);
-
-      const currentVol = (fuelPercent / 100) * tankCapacity;
-      const currentEth = currentVol * currentEthanol;
-
-      const maxAddable = tankCapacity - currentVol;
-      let bestResult = null;
-
-      for (let e85Add = Math.min(e85Available, maxAddable); e85Add >= 0; e85Add -= 0.01) {
-        for (let e93Add = maxAddable - e85Add; e93Add >= 0; e93Add -= 0.01) {
-          const totalVol = currentVol + e85Add + e93Add;
-          if (totalVol > tankCapacity) continue;
-
-          const totalEth = currentEth + (e85Add * e85Pct) + (e93Add * e10Pct);
-          const finalPct = totalEth / totalVol;
-
-          if (finalPct >= 54.9 && finalPct <= 55.1) {
-            bestResult = {
-              e85: e85Add.toFixed(2),
-              e93: e93Add.toFixed(2),
-              e93L: (e93Add * 3.785).toFixed(2),
-              totalVol: totalVol.toFixed(2),
-              percentFull: ((totalVol / tankCapacity) * 100).toFixed(1),
-              ethanol: finalPct.toFixed(2)
-            };
-            break;
-          }
+    <script>
+        function updateSlider(slider) {
+            const id = slider.id + "Val";
+            document.getElementById(id).innerText = slider.value + "%";
+            slider.style.setProperty("--val", slider.value + "%");
         }
-        if (bestResult) break;
-      }
 
-      const resultDiv = document.getElementById('result');
-      if (bestResult) {
-        resultDiv.innerHTML = `
-          <strong>✅ Optimized Blend (E55):</strong><br/>
-          ➤ Add E85: ${bestResult.e85} gal<br/>
-          ➤ Add 93 Octane: ${bestResult.e93L} L (${bestResult.e93} gal)<br/>
-          ➤ Final Ethanol: ${bestResult.ethanol}%<br/>
-          ➤ Final Volume: ${bestResult.totalVol} gal (${bestResult.percentFull}% of tank)
-        `;
-      } else {
-        resultDiv.innerHTML = "❌ No valid blend found for E55 without overfilling.";
-      }
+        function calculate() {
+            const tankCap = 15.6;
+            const currFuel = (document.getElementById("fuelLevel").value / 100) * tankCap;
+            const currEth = document.getElementById("ethanolPercent").value / 100;
+            const targetVol = (document.getElementById("targetFill").value / 100) * tankCap;
+            const e85 = document.getElementById("e85Percent").value / 100;
+            const targetEth = 0.55;
 
-      resultDiv.classList.add("visible");
-    }
-  </script>
+            let min93 = 0, max93 = targetVol - currFuel;
+            let found = false, addE85 = 0;
+
+            for (let add93 = min93; add93 <= max93; add93 += 0.01) {
+                let total = currFuel + add93;
+                let neededEthanol = targetEth * (total + addE85);
+                let currentEthanol = (currFuel * currEth) + (add93 * 0.10);
+                let remainingEthanol = neededEthanol - currentEthanol;
+                let requiredE85 = remainingEthanol / e85;
+
+                if (requiredE85 + currFuel + add93 <= targetVol + 0.01) {
+                    addE85 = requiredE85;
+                    found = true;
+                    break;
+                }
+            }
+
+            const box = document.getElementById("resultBox");
+            if (!found) {
+                let maxE85Vol = targetVol - currFuel;
+                let finalEth = ((currFuel * currEth) + (maxE85Vol * e85)) / targetVol;
+                box.innerHTML = `⚠️ Cannot achieve E55 with inputs. Best possible: <strong>E${Math.round(finalEth * 100)}</strong>`;
+            } else {
+                const liters = (addE85 * 3.785).toFixed(2);
+                const gallons = addE85.toFixed(2);
+                const finalPct = ((currFuel + addE85 + (targetVol - currFuel - addE85)) / tankCap * 100).toFixed(1);
+                box.innerHTML = `Add <strong>${liters} L</strong> of E85 <span style="color:gray;">(${gallons} gal)</span><br>Final Fill: <strong>${finalPct}%</strong>`;
+            }
+        }
+    </script>
 </body>
 </html>
