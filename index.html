@@ -1,193 +1,206 @@
-<!DOCTYPE html>
 
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>E55 Mix Optimizer</title>
-<link href="manifest.json" rel="manifest"/>
-<style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <link rel="manifest" href="manifest.json" />
+  <title>E55 Mix Optimizer</title>
+  <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: #111;
-      color: #fff;
+      background-color: #1e1e1e;
+      color: white;
+      font-family: Arial, sans-serif;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
-      height: 100vh;
       margin: 0;
     }
     .container {
-      background-color: #1e1e1e;
+      background-color: #2b2b2b;
       padding: 30px;
+      margin: 40px 0;
       border-radius: 20px;
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
       width: 90%;
       max-width: 500px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     }
     h1 {
-      color: #57f287;
       text-align: center;
-      font-size: 1.8rem;
-      margin-bottom: 20px;
+      color: #4ade80;
+      font-size: 24px;
+      margin-bottom: 30px;
     }
     label {
       display: block;
-      margin: 20px 0 5px;
+      margin-top: 20px;
+      font-weight: bold;
+      font-size: 16px;
     }
-    .slider-container {
-      position: relative;
-      width: 100%;
+    .slider-group {
+      margin-top: 10px;
     }
     input[type="range"] {
       width: 100%;
+      -webkit-appearance: none;
       appearance: none;
-      height: 8px;
-      background: #333;
+      height: 10px;
+      background: #555;
       border-radius: 5px;
       outline: none;
-      transition: background 0.3s;
     }
     input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
       appearance: none;
-      height: 24px;
       width: 24px;
+      height: 24px;
       border-radius: 50%;
-      background: white;
-      border: 3px solid #57f287;
+      background: #bbf7d0;
+      border: 2px solid #22c55e;
       cursor: pointer;
-      margin-top: -8px;
-      box-shadow: 0 0 2px rgba(0,0,0,0.5);
+      margin-top: -7px;
     }
-    .value-label {
-      font-size: 0.9rem;
-      color: #ccc;
-      margin-top: 5px;
+    input[type="range"]::-moz-range-thumb {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #bbf7d0;
+      border: 2px solid #22c55e;
+      cursor: pointer;
+    }
+    .value {
       text-align: right;
+      color: #4ade80;
+      font-weight: bold;
+      font-size: 16px;
+      margin-top: 4px;
     }
     button {
       width: 100%;
       padding: 12px;
-      font-size: 1rem;
+      margin-top: 20px;
+      font-size: 16px;
       border: none;
       border-radius: 8px;
-      margin-top: 15px;
       cursor: pointer;
     }
-    .calculate {
-      background-color: #007bff;
+    #calculateBtn {
+      background-color: #3b82f6;
       color: white;
     }
-    .reset {
-      background-color: #333;
+    #resetBtn {
+      background-color: #404040;
       color: white;
     }
-    .result {
+    #result {
       margin-top: 20px;
-      background-color: #2c2c2c;
+      background-color: #3a3a3a;
       padding: 15px;
-      border-radius: 10px;
-      color: #bfffc5;
-      font-size: 0.95rem;
+      border-radius: 12px;
+      font-size: 16px;
     }
-  
-.slider-value {
-  text-align: right;
-  font-size: 16px;
-  font-weight: bold;
-  color: #90ee90;
-  margin-top: 4px;
-}
-</style>
+    #result.success {
+      color: #a7f3d0;
+    }
+    #result.error {
+      color: #fca5a5;
+    }
+  </style>
 </head>
 <body>
-<div class="container">
-<h1>Target: E55 Mix Optimizer</h1>
-<label>Current Fuel Level (% of 15.6 gal):</label>
-<div class="slider-container">
-<input id="fuelLevel" max="100" min="0" oninput="updateValue(this)" type="range" value="50"/>
-<div class="value-label" id="fuelLevelVal">50%</div>
-<div class="slider-value" id="valueDisplay0">0%</div></div>
-<label>Current Ethanol % (from flex sensor):</label>
-<div class="slider-container">
-<input id="ethanolCurrent" max="100" min="0" oninput="updateValue(this)" type="range" value="50"/>
-<div class="value-label" id="ethanolCurrentVal">50%</div>
-<div class="slider-value" id="valueDisplay1">0%</div></div>
-<label>Target Fuel Level (% of 15.6 gal):</label>
-<div class="slider-container">
-<input id="fuelTarget" max="100" min="0" oninput="updateValue(this)" type="range" value="90"/>
-<div class="value-label" id="fuelTargetVal">90%</div>
-<div class="slider-value" id="valueDisplay2">0%</div></div>
-<label>Actual E85 % (measured at pump):</label>
-<div class="slider-container">
-<input id="ethanolE85" max="100" min="70" oninput="updateValue(this)" type="range" value="85"/>
-<div class="value-label" id="ethanolE85Val">85%</div>
-<div class="slider-value" id="valueDisplay3">0%</div></div>
-<button class="calculate" onclick="calculate()">Calculate</button>
-<button class="reset" onclick="resetForm()">Reset</button>
-<div class="result" id="resultBox" style="display:none;"></div>
-</div>
-<script>
-    function updateValue(input) {
-      document.getElementById(input.id + 'Val').textContent = input.value + '%';
-    }
+  <div class="container">
+    <h1>Target: E55 Mix Optimizer</h1>
+    <label>Current Fuel Level (% of 15.6 gal):</label>
+    <div class="slider-group">
+      <input type="range" min="0" max="100" value="50" id="currentFuelSlider">
+      <div class="value" id="currentFuelValue">50%</div>
+    </div>
 
-    function calculate() {
-      const tankSize = 15.6;
-      const curLevel = parseFloat(document.getElementById('fuelLevel').value) / 100 * tankSize;
-      const curE = parseFloat(document.getElementById('ethanolCurrent').value);
-      const tgtLevel = parseFloat(document.getElementById('fuelTarget').value) / 100 * tankSize;
-      const e85 = parseFloat(document.getElementById('ethanolE85').value);
-      const tgtE = 55;
+    <label>Current Ethanol % (from flex sensor):</label>
+    <div class="slider-group">
+      <input type="range" min="0" max="100" value="50" id="currentEthanolSlider">
+      <div class="value" id="currentEthanolValue">50%</div>
+    </div>
 
-      let bestMatch = null;
-      for (let e85Add = 0; e85Add <= (tgtLevel - curLevel); e85Add += 0.01) {
-        let totalVol = curLevel + e85Add;
-        let eContent = (curLevel * curE + e85Add * e85) / totalVol;
-        let needed93 = tgtLevel - totalVol;
-        let finalVol = totalVol + needed93;
-        eContent = (curLevel * curE + e85Add * e85 + needed93 * 10) / finalVol;
-        if (Math.abs(eContent - tgtE) < 0.2) {
-          bestMatch = { e85Add, needed93, finalVol, eContent };
-          break;
-        }
-      }
+    <label>Target Fuel Level (% of 15.6 gal):</label>
+    <div class="slider-group">
+      <input type="range" min="0" max="100" value="90" id="targetFuelSlider">
+      <div class="value" id="targetFuelValue">90%</div>
+    </div>
 
-      let resultBox = document.getElementById('resultBox');
-      if (bestMatch) {
-        const e85L = (bestMatch.e85Add * 3.785).toFixed(1);
-        const r93L = (bestMatch.needed93 * 3.785).toFixed(1);
-        const volPct = ((bestMatch.finalVol / tankSize) * 100).toFixed(1);
-        resultBox.innerHTML = `
-          ✅ <strong>Optimized Blend (Target: E55)</strong><br>
-          ➤ Add E85: ${e85L} L (${bestMatch.e85Add.toFixed(2)} gal)<br>
-          ➤ Add 93 Octane: ${r93L} L (${bestMatch.needed93.toFixed(2)} gal)<br>
-          ➤ Final Ethanol: ${bestMatch.eContent.toFixed(2)}%<br>
-          ➤ Final Volume: ${bestMatch.finalVol.toFixed(2)} gal (${volPct}% of tank)
-        `;
-      } else {
-        resultBox.innerHTML = `⚠️ Could not reach E55. Try increasing your E85 volume or reducing target fill.`;
-      }
-      resultBox.style.display = 'block';
-    }
+    <label>Actual E85 % (measured at pump):</label>
+    <div class="slider-group">
+      <input type="range" min="70" max="85" value="83" id="actualE85Slider">
+      <div class="value" id="actualE85Value">83%</div>
+    </div>
 
-    function resetForm() {
-      ['fuelLevel','ethanolCurrent','fuelTarget','ethanolE85'].forEach(id => {
-        let input = document.getElementById(id);
-        input.value = id === 'fuelTarget' ? 90 : 50;
-        updateValue(input);
+    <button id="calculateBtn">Calculate</button>
+    <button id="resetBtn">Reset</button>
+
+    <div id="result"></div>
+  </div>
+
+  <script>
+    const sliders = [
+      { id: "currentFuelSlider", output: "currentFuelValue" },
+      { id: "currentEthanolSlider", output: "currentEthanolValue" },
+      { id: "targetFuelSlider", output: "targetFuelValue" },
+      { id: "actualE85Slider", output: "actualE85Value" },
+    ];
+
+    sliders.forEach(({ id, output }) => {
+      const slider = document.getElementById(id);
+      const display = document.getElementById(output);
+      display.textContent = slider.value + "%";
+      slider.addEventListener("input", () => {
+        display.textContent = slider.value + "%";
       });
-      document.getElementById('ethanolE85').value = 85;
-      updateValue(document.getElementById('ethanolE85'));
-      document.getElementById('resultBox').style.display = 'none';
-    }
-  
-document.querySelectorAll(".slider-container input[type=range]").forEach((slider, i) => {
-  const valueDisplay = document.getElementById(`valueDisplay${i}`);
-  const updateValue = () => valueDisplay.textContent = slider.value + "%";
-  slider.addEventListener("input", updateValue);
-  updateValue();
-});
-</script>
+    });
+
+    document.getElementById("calculateBtn").addEventListener("click", () => {
+      const tankCapacity = 15.6;
+      const currentFuel = document.getElementById("currentFuelSlider").value / 100 * tankCapacity;
+      const currentEth = document.getElementById("currentEthanolSlider").value / 100;
+      const targetFuel = document.getElementById("targetFuelSlider").value / 100 * tankCapacity;
+      const targetEth = 0.55;
+      const actualE85 = document.getElementById("actualE85Slider").value / 100;
+
+      const V_new = targetFuel - currentFuel;
+      const E_current = currentFuel * currentEth;
+
+      const E85_gal = (targetFuel * targetEth - E_current - V_new * 0.10) / (actualE85 - 0.10);
+      const E85_l = E85_gal * 3.785;
+
+      let result = document.getElementById("result");
+
+      if (E85_gal < 0 || E85_gal > V_new) {
+        const E_max = E_current + V_new * actualE85;
+        const E_min = E_current + V_new * 0.10;
+        const max_Ethanol = E_max / targetFuel;
+
+        result.innerHTML = `
+          ❌ Cannot reach E55 with inputs.<br/>
+          Max Achievable Ethanol: ${(max_Ethanol * 100).toFixed(2)}%<br/>
+          Final Volume: ${targetFuel.toFixed(2)} gal (${((targetFuel / tankCapacity) * 100).toFixed(1)}% of tank)
+        `;
+        result.className = "error";
+      } else {
+        const E85_added = E85_gal;
+        const Octane_added = V_new - E85_added;
+        const final_Ethanol = (E_current + E85_added * actualE85 + Octane_added * 0.10) / targetFuel;
+
+        result.innerHTML = `
+          ✅ <strong>Optimized Blend (Target: E55)</strong><br/>
+          ➤ Add E85: ${E85_l.toFixed(1)} L (${E85_added.toFixed(2)} gal)<br/>
+          ➤ Add 93 Octane: ${(Octane_added * 3.785).toFixed(1)} L (${Octane_added.toFixed(2)} gal)<br/>
+          ➤ Final Ethanol: ${(final_Ethanol * 100).toFixed(2)}%<br/>
+          ➤ Final Volume: ${targetFuel.toFixed(2)} gal (${((targetFuel / tankCapacity) * 100).toFixed(1)}% of tank)
+        `;
+        result.className = "success";
+      }
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", () => location.reload());
+  </script>
 </body>
 </html>
