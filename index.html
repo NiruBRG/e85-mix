@@ -6,6 +6,47 @@
   <title>E55 Mix Optimizer</title>
   <link rel="manifest" href="manifest.json">
   <style>
+/* Prevent iOS input zoom */
+input, select, textarea {
+  font-size: 16px;
+}
+
+/* Fix slider green backfill */
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 8px;
+  background: #ccc;
+  border-radius: 5px;
+  outline: none;
+  transition: background 0.3s;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #4caf50;
+  cursor: pointer;
+  margin-top: -7px;
+}
+input[type=range]::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #4caf50;
+  cursor: pointer;
+}
+/* For green fill as range is dragged */
+input[type=range]::-webkit-slider-runnable-track {
+  background: linear-gradient(to right, #4caf50 0%, #4caf50 var(--val, 50%), #ccc var(--val, 50%), #ccc 100%);
+  height: 8px;
+  border-radius: 5px;
+}
+</style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
       background-color: #111;
