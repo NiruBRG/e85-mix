@@ -8,6 +8,9 @@
   <link rel="apple-touch-icon" href="icon.png">
   <title>Ethanol Mix Optimizer (E55 Target)</title>
   <style>
+    :root {
+      --accent: #8fe388;
+    }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen;
       background-color: #1e1e1e;
@@ -27,6 +30,29 @@
       margin-bottom: 0.4em;
     }
     input[type=range] {
+      -webkit-appearance: none;
+      height: 6px;
+      border-radius: 5px;
+      background: #444;
+      outline: none;
+      transition: background 0.2s;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      background: var(--accent);
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    input[type=range]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      background: var(--accent);
+      border-radius: 50%;
+      cursor: pointer;
+    }
       width: 100%;
     }
     .slider-value {
@@ -131,19 +157,19 @@
       if (Math.abs(bestMatch.final - targetEthanol) < 0.005) {
         resultDiv.innerHTML = `
           <strong>✅ Optimized Blend (Target: E55)</strong><br/>
-          ➤ Add E85: ${bestMatch.e85.toFixed(2)} gal<br/>
+          ➤ Add E85: ${bestMatch.e85.toFixed(2)} gal (${(bestMatch.e85 * 3.785).toFixed(1)} L)<br/>
           ➤ Add 93 Octane: ${(bestMatch.e93 * 3.785).toFixed(2)} L (${bestMatch.e93.toFixed(2)} gal)<br/>
           ➤ Final Ethanol: ${(bestMatch.final * 100).toFixed(2)}%<br/>
-          ➤ Final Volume: ${bestMatch.total.toFixed(2)} gal
+          ➤ Final Volume: ${bestMatch.total.toFixed(2)} gal (${((bestMatch.total / 15.6) * 100).toFixed(1)}% of tank)
         `;
       } else {
         resultDiv.innerHTML = `
           <strong>⚠️ E55 not achievable with current inputs.</strong><br/>
           <em>Closest blend found:</em><br/>
-          ➤ Add E85: ${bestMatch.e85.toFixed(2)} gal<br/>
+          ➤ Add E85: ${bestMatch.e85.toFixed(2)} gal (${(bestMatch.e85 * 3.785).toFixed(1)} L)<br/>
           ➤ Add 93 Octane: ${(bestMatch.e93 * 3.785).toFixed(2)} L (${bestMatch.e93.toFixed(2)} gal)<br/>
           ➤ Final Ethanol: ${(bestMatch.final * 100).toFixed(2)}%<br/>
-          ➤ Final Volume: ${bestMatch.total.toFixed(2)} gal
+          ➤ Final Volume: ${bestMatch.total.toFixed(2)} gal (${((bestMatch.total / 15.6) * 100).toFixed(1)}% of tank)
         `;
       }
     }
