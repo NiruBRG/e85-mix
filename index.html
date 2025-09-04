@@ -21,7 +21,7 @@
     }
     .container {
       box-sizing: border-box;
-      width: 100%;
+      width: calc(100% - 2px); max-width: 100%; box-sizing: border-box;
       padding: 20px;
       margin: 0 auto;
       overflow: hidden;
@@ -52,14 +52,14 @@
       border: 1px solid #444;
       background-color: #2a2a2a;
       color: #ffffff;
-      width: 100%;
-      max-width: 100%;
+      width: calc(100% - 2px); max-width: 100%; box-sizing: border-box;
+      max-width: calc(100% - 2px); max-width: 100%; box-sizing: border-box;
       display: block;
     }
       margin-bottom: 16px;
     }
     input {
-      width: 100%;
+      width: calc(100% - 2px); max-width: 100%; box-sizing: border-box;
       padding: 12px;
       font-size: 16px;
       background: #2a2a2a;
@@ -71,7 +71,7 @@
     button {
       border-radius: 8px;
     }
-      width: 100%;
+      width: calc(100% - 2px); max-width: 100%; box-sizing: border-box;
       padding: 12px;
       font-size: 16px;
       margin-top: 15px;
@@ -122,7 +122,13 @@
         let totalEthanol = ethanolFromExisting + ethanolFromE85;
         let ethanolPercentage = totalEthanol / totalFuel;
 
-        if (ethanolPercentage >= targetEthanol - 0.005 && ethanolPercentage <= targetEthanol + 0.005) {
+        
+        const isMatchingEthanol = Math.abs(currentEthanol - targetEthanol) < 0.005;
+        const wantsMoreVolume = targetFuelVolume > currentFuel;
+        const meetsTarget = ethanolPercentage >= targetEthanol - 0.005 && ethanolPercentage <= targetEthanol + 0.005;
+
+        if ((isMatchingEthanol && wantsMoreVolume && totalFuel <= targetFuelVolume) || meetsTarget) {
+    
           let needed93 = targetFuelVolume - currentFuel - e85Gal;
           if (needed93 >= 0) {
             resultText = `Add <b>${e85Gal.toFixed(2)} gal</b> (${(e85Gal * 3.785).toFixed(1)} L) of E85<br>` +
